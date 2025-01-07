@@ -29,7 +29,8 @@ const bankAccountSchema = new mongoose.Schema({
   accountType: {
     type: String,
     required: true,
-    enum: ["savings", "checking", "business", "other"],
+    enum: ["SAVINGS", "CHECKING", "BUSINESS", "OTHER"],
+    set: (value) => value.toUpperCase(),
     default: "",
   },
   bookBalance: {
@@ -45,7 +46,8 @@ const bankAccountSchema = new mongoose.Schema({
   status: {
     type: String,
     required: true,
-    enum: ["active", "inactive", "closed"],
+    enum: ["ACTIVE", "INACTIVE", "CLOSED"], 
+    set: (value) => value.toUpperCase(),
     default: "active",
   },
   routingNumberOrIFSC: {

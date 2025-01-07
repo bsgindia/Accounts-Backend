@@ -20,22 +20,23 @@ exports.registerBankAccount = async (req, res) => {
     if (existingAccount) {
       return res.status(400).json({ message: "Account with this number already exists" });
     }
+    
     const newBankAccount = new BankAccount({
       accountName,
       accountNumber,
       bankName,
       branchName,
-      accountType:accountType?.toLowerCase(),
+      accountType: accountType?.toUpperCase(),
       bookBalance,
       bankBalance,
-      status:status?.toLowerCase(),
+      status: status?.toUpperCase(),
       routingNumberOrIFSC,
       openingDate,
       contactPerson,
       notes,
     });
     await newBankAccount.save();
-    res.status(201).json({ message: "Bank account registered successfully"});
+    res.status(201).json({ message: "Bank account registered successfully" });
   } catch (error) {
     res.status(500).json({ message: "Error registering bank account", error });
   }
@@ -77,6 +78,12 @@ exports.updateBankAccount = async (req, res) => {
     if (!Object.keys(updateData).length) {
       return res.status(400).json({ message: "No fields provided for update" });
     }
+    if (updateData.accountType) {
+      updateData.accountType = updateData.accountType.toUpperCase();
+    }
+    if (updateData.status) {
+      updateData.status = updateData.status.toUpperCase();
+    }
     const updatedAccount = await BankAccount.findOneAndUpdate(
       { accountNumber: accountId },
       updateData,
@@ -88,7 +95,7 @@ exports.updateBankAccount = async (req, res) => {
     if (!updatedAccount) {
       return res.status(404).json({ message: "Bank account not found" });
     }
-    res.status(200).json({ message: "Bank account updated successfully"});
+    res.status(200).json({ message: "Bank account updated successfully" });
   } catch (error) {
     res.status(500).json({ message: "Error updating bank account", error });
   }
@@ -108,5 +115,18 @@ exports.getTotalBalances = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: "Error retrieving total balances", error });
+  }
+};
+
+
+
+exports.getaccountNumber = async (req, res) => {
+  try {
+    const bankAccounts = await BankAccount.find({}, { accountNumber: 1 });
+    res.status(200).json({
+      accounts: bankAccounts,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error retrieving account numbers", error });
   }
 };
