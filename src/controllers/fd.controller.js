@@ -23,8 +23,6 @@ exports.registerFD = async (req, res) => {
         !maturityDate ||
         !interestRate ||
         !maturityAmount ||
-        !interestEarned ||
-        !renewalStatus ||
         !lockingPeriod
     ) {
         return res.status(400).json({ message: 'All required fields must be provided.' });

@@ -50,7 +50,7 @@ const fdSchema = new mongoose.Schema(
         },
         interestEarned: {
             type: Number,
-            required: true,
+            default: 0,
         },
         renewalStatus: {
             type: String,
