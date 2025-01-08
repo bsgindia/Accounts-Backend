@@ -56,3 +56,72 @@ exports.registerFD = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };  
+
+
+
+
+exports.getAllFDs = async (req, res) => {
+    try {
+        const fds = await FDModel.find({});      
+        if (fds.length === 0) {
+            return res.status(404).json({ message: 'No FDs found' });
+        }
+        res.status(200).json({
+            message: 'All FD details fetched successfully',
+            fds,
+        });
+    } catch (error) {
+        console.error('Error fetching FD details:', error.message);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+
+exports.getAllFDAmount = async (req, res) => {
+    try {
+        const result = await FDModel.aggregate([
+            { $project: { fdAdmount: { $toDouble: "$fdAdmount" } } },
+            { $group: { _id: null, totalAmount: { $sum: "$fdAdmount" } } }
+        ]);
+        const totalAmount = result.length > 0 ? result[0].totalAmount : 0;
+        const fds = await FDModel.find({}).select('fdAdmount'); 
+        
+        if (fds.length === 0) {
+            return res.status(404).json({ message: 'No FDs found' });
+        }
+        res.status(200).json({
+            message: 'All FD details fetched successfully',
+            totalAmount
+        });
+    } catch (error) {
+        console.error('Error fetching FD details:', error.message);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+
+exports.updateFDByNumber = async (req, res) => {
+    const { fdNumber } = req.params;
+    const updateData = req.body;
+    if (!fdNumber) {
+        return res.status(400).json({ message: 'FD number must be provided.' });
+    }
+    try {
+        const existingFD = await FDModel.findOne({ fdNumber });
+        if (!existingFD) {
+            return res.status(404).json({ message: 'FD with this number does not exist.' });
+        }
+        const updatedFD = await FDModel.findOneAndUpdate(
+            { fdNumber },
+            { $set: updateData },
+            { new: true, runValidators: true }
+        );
+        res.status(200).json({
+            message: 'FD updated successfully',
+            updatedFD,
+        });
+    } catch (error) {
+        console.error('Error updating FD:', error.message);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
