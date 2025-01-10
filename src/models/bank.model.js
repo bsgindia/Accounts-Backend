@@ -29,7 +29,6 @@ const bankAccountSchema = new mongoose.Schema({
   accountType: {
     type: String,
     required: true,
-    enum: ["SAVINGS", "CHECKING", "BUSINESS", "OTHER"],
     set: (value) => value.toUpperCase(),
     default: "",
   },
