@@ -125,3 +125,31 @@ exports.updateFDByNumber = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
+
+
+
+exports.getFundSums = async (req, res) => {
+    try {
+        const result = await FDModel.aggregate([
+            { $unwind: "$principalAmount" },
+            {
+                $group: {
+                    _id: "$principalAmount.fund",
+                    totalAmount: { $sum: "$principalAmount.amount" }
+                }
+            }
+        ]);
+
+        if (result.length === 0) {
+            return res.status(404).json({ message: 'No funds found.' });
+        }
+
+        res.status(200).json({
+            message: 'Sum of all funds fetched successfully',
+            result
+        });
+    } catch (error) {
+        console.error('Error fetching sum of funds:', error.message);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
