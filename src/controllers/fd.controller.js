@@ -80,24 +80,41 @@ exports.getAllFDs = async (req, res) => {
 exports.getAllFDAmount = async (req, res) => {
     try {
         const result = await FDModel.aggregate([
-            { $project: { fdAdmount: { $toDouble: "$fdAdmount" } } },
-            { $group: { _id: null, totalAmount: { $sum: "$fdAdmount" } } }
+            { 
+                $project: { 
+                    fdAdmount: { $toDouble: "$fdAdmount" }, 
+                    maturityAmount: { $toDouble: "$maturityAmount" } 
+                } 
+            },
+            { 
+                $group: { 
+                    _id: null, 
+                    totalAmount: { $sum: "$fdAdmount" }, 
+                    totalMaturityAmount: { $sum: "$maturityAmount" } 
+                } 
+            }
         ]);
+
         const totalAmount = result.length > 0 ? result[0].totalAmount : 0;
-        const fds = await FDModel.find({}).select('fdAdmount'); 
-        
+        const totalMaturityAmount = result.length > 0 ? result[0].totalMaturityAmount : 0;
+
+        const fds = await FDModel.find({}).select('fdAdmount maturityAmount');
+
         if (fds.length === 0) {
             return res.status(404).json({ message: 'No FDs found' });
         }
+
         res.status(200).json({
             message: 'All FD details fetched successfully',
-            totalAmount
+            totalAmount,
+            totalMaturityAmount
         });
     } catch (error) {
         console.error('Error fetching FD details:', error.message);
         res.status(500).json({ message: 'Internal server error' });
     }
 };
+
 
 
 exports.updateFDByNumber = async (req, res) => {
