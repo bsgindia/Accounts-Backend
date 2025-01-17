@@ -79,3 +79,34 @@ exports.deleteLiability = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+exports.getTotalOutstanding = async (req, res) => {
+  try {
+    const result = await Liability.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalOutstanding: { $sum: "$totalOutstanding" },
+        },
+      },
+    ]);
+
+    if (result.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No liabilities found.",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      totalOutstanding: result[0].totalOutstanding,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
