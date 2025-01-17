@@ -5,7 +5,6 @@ const fdSchema = new mongoose.Schema(
         fdNumber: {
             type: String,
             required: true,
-            unique: true,
             default: "",
         },
         connectingAccount: {
@@ -22,7 +21,6 @@ const fdSchema = new mongoose.Schema(
         fdAdmount: {
             type: String,
             required: true,
-            unique: true,
             default: "",
         },
         startDate: {
