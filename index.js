@@ -8,7 +8,10 @@
 // const fundRoutes = require('./src/routes/funds.routes.js'); 
 // const fdRoutes = require('./src/routes/fd.routes');
 // const particularsRoutes= require("./src/routes/particular.routes.js");
-// const liabilityRoutes= require("./src/routes/liability.routes.js")
+// const liabilityRoutes= require("./src/routes/liability.routes.js");
+// const receivableRoutes=require("./src/routes/receivable.routes.js");
+// const receivableDetailsRoutes=require("./src/routes/receivabledeatails.routes.js");
+// const stateRoutes = require('./src/routes/state.routes.js');
 // dotenv.config();
 // const app = express();
 // app.use(
@@ -40,6 +43,9 @@
 // app.use('/api/fd', fdRoutes);
 // app.use('/api/particulars', particularsRoutes);
 // app.use("/api/v1/liabilities", liabilityRoutes);
+// app.use("/api/v1/receivable", receivableRoutes);
+// app.use("/api/v1/receivabledetails",receivableDetailsRoutes);
+// app.use('/api/v1', stateRoutes);
 // const startServer = async () => {
 //     try {
 //         await connectToDatabase();
@@ -69,7 +75,10 @@ const bankRoutes = require('./src/routes/bankRoutes.routes.js');
 const fundRoutes = require('./src/routes/funds.routes.js'); 
 const fdRoutes = require('./src/routes/fd.routes');
 const particularsRoutes= require("./src/routes/particular.routes.js");
-const liabilityRoutes= require("./src/routes/liability.routes.js")
+const liabilityRoutes= require("./src/routes/liability.routes.js");
+const receivableRoutes=require("./src/routes/receivable.routes.js");
+const receivableDetailsRoutes=require("./src/routes/receivabledeatails.routes.js");
+const stateRoutes = require('./src/routes/state.routes.js');
 dotenv.config();
 
 const app = express();
@@ -111,7 +120,9 @@ app.use('/api/funds', fundRoutes);
 app.use('/api/fd', fdRoutes);
 app.use('/api/particulars', particularsRoutes);
 app.use("/api/v1/liabilities", liabilityRoutes);
-
+app.use("/api/v1/receivable", receivableRoutes);
+app.use("/api/v1/receivabledetails",receivableDetailsRoutes);
+app.use('/api/v1', stateRoutes);
 const startServer = async () => {
     try {
         await connectToDatabase();

@@ -61,6 +61,7 @@ exports.registerFD = async (req, res) => {
 
 
 exports.getAllFDs = async (req, res) => {
+    
     try {
         const fds = await FDModel.find({});      
         if (fds.length === 0) {
