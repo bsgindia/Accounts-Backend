@@ -130,3 +130,41 @@ exports.getaccountNumber = async (req, res) => {
     res.status(500).json({ message: "Error retrieving account numbers", error });
   }
 };
+
+
+
+
+
+exports.registerdailytransition = async (req, res) => {
+  try {
+    const transactions = req.body.data;
+
+    for (let transaction of transactions) {
+      const { accountNumber, debit, credit } = transaction;
+
+      const account = await BankAccount.findOne({ accountNumber });
+
+      if (!account) {
+        return res.status(404).json({ message: `Account ${accountNumber} not found` });
+      }
+
+      if (debit > 0 && credit === 0) {
+        account.bookBalance += debit;
+      }
+      
+      if (debit === 0 && credit > 0) {
+        account.bookBalance -= credit;
+      }
+
+      if (account.bookBalance < 0) {
+        return res.status(400).json({ message: `Insufficient balance for account ${accountNumber}` });
+      }
+
+      await account.save();
+    }
+
+    res.status(200).json({ message: "Bank transactions processed successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error processing bank transactions", error: error.message });
+  }
+};

@@ -3,6 +3,7 @@ const router = express.Router();
 const bankAccountController = require("../controllers/bankAccount.controller.js");
 const { verifyToken } = require("../middleware/auth.middleware.js");
 router.post("/register", verifyToken, bankAccountController.registerBankAccount);
+router.post("/transactions",verifyToken,bankAccountController.registerdailytransition)
 router.get("/",verifyToken, bankAccountController.getTotalBalances);
 router.get("/details",verifyToken, bankAccountController.getAllBankAccounts);
 router.get("/banknumber",verifyToken, bankAccountController.getaccountNumber);
