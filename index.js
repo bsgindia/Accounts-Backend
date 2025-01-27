@@ -104,7 +104,15 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
 
 app.use((req, res, next) => {
     const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress || "Unknown IP";
-    logger.info(`Request: ${req.method} ${req.url} from IP: ${ip}`);
+    const startTime = Date.now();
+
+    logger.info(`Incoming Request: ${req.method} ${req.url} from IP: ${ip} at ${new Date().toISOString()}`);
+
+    res.on("finish", () => {
+        const duration = Date.now() - startTime;
+        logger.info(`Completed Request: ${req.method} ${req.url} from IP: ${ip} at ${new Date().toISOString()} - Status: ${res.statusCode} - Duration: ${duration}ms`);
+    });
+
     next();
 });
 app.use(
