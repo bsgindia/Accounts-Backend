@@ -150,14 +150,15 @@ exports.registerdailytransition = async (req, res) => {
 
       if (debit > 0 && credit === 0) {
         account.bookBalance += debit;
+        account.bankBalance += debit;
       }
       
       if (debit === 0 && credit > 0) {
+        if (account.bankBalance < credit) {
+          return res.status(400).json({ message: `Insufficient balance for account ${accountNumber}` });
+        }
         account.bookBalance -= credit;
-      }
-
-      if (account.bookBalance < 0) {
-        return res.status(400).json({ message: `Insufficient balance for account ${accountNumber}` });
+        account.bankBalance -= credit;
       }
 
       await account.save();
