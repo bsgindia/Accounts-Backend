@@ -171,3 +171,32 @@ exports.getFundSums = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
+
+
+exports.getFundsByName = async (req, res) => {
+    try {
+      const { fundName } = req.query;
+  
+      if (!fundName) {
+        return res.status(400).json({ error: "Fund name is required" });
+      }
+  
+      const funds = await FDModel.aggregate([
+        { $unwind: "$principalAmount" },
+        { $match: { "principalAmount.fund": fundName } },
+        {
+          $project: {
+            _id: 0,
+            fdNumber: 1,
+            "principalAmount.fund": 1,
+            "principalAmount.amount": 1
+          }
+        }
+      ]);
+  
+      res.status(200).json(funds);
+    } catch (error) {
+      res.status(500).json({ error: "Internal Server Error", details: error.message });
+    }
+  };
+  
