@@ -7,5 +7,5 @@ router.get('/fds', verifyToken, getAllFDs);
 router.get('/all',verifyToken ,getAllFDAmount);
 router.get('/principal/amount',verifyToken ,getFundSums);
 router.put("/update/:fdNumber",verifyToken,updateFDByNumber);
-router.get("/funds", getFundsByName);
+router.get("/funds",verifyToken, getFundsByName);
 module.exports = router;
