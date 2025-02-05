@@ -1,5 +1,5 @@
 const BankAccount = require("../models/bank.model");
-
+const Transaction = require("../models/transaction.model");
 exports.registerBankAccount = async (req, res) => {
   try {
     const {
@@ -20,7 +20,7 @@ exports.registerBankAccount = async (req, res) => {
     if (existingAccount) {
       return res.status(400).json({ message: "Account with this number already exists" });
     }
-    
+
     const newBankAccount = new BankAccount({
       accountName,
       accountNumber,
@@ -138,34 +138,72 @@ exports.getaccountNumber = async (req, res) => {
 exports.registerdailytransition = async (req, res) => {
   try {
     const transactions = req.body.data;
-
+    console.log("Received transactions:", transactions);
     for (let transaction of transactions) {
-      const { accountNumber, debit, credit } = transaction;
-
+      const { date, accountNumber, debit, credit, particular } = transaction;
       const account = await BankAccount.findOne({ accountNumber });
 
       if (!account) {
         return res.status(404).json({ message: `Account ${accountNumber} not found` });
       }
-
+      const balanceBeforeTransaction = account.bankBalance;
+      let balanceAfterTransaction = balanceBeforeTransaction;
       if (debit > 0 && credit === 0) {
         account.bookBalance += debit;
         account.bankBalance += debit;
+        balanceAfterTransaction += debit;
       }
-      
       if (debit === 0 && credit > 0) {
         if (account.bankBalance < credit) {
           return res.status(400).json({ message: `Insufficient balance for account ${accountNumber}` });
         }
         account.bookBalance -= credit;
         account.bankBalance -= credit;
+        balanceAfterTransaction -= credit;
       }
-
       await account.save();
+      const newTransaction = new Transaction({
+        date,
+        particular,
+        accountNumber,
+        debit,
+        credit,
+        transactionType: debit > 0 ? "debit" : "credit",
+        balanceBeforeTransaction,
+        balanceAfterTransaction,
+        status: "completed"
+      });
+console.log(newTransaction)
+      await newTransaction.save();
     }
 
-    res.status(200).json({ message: "Bank transactions processed successfully" });
+    res.status(200).json({ message: "Bank transactions processed and saved successfully" });
   } catch (error) {
+    console.error("Error processing transactions:", error);
     res.status(500).json({ message: "Error processing bank transactions", error: error.message });
+  }
+};
+
+
+
+exports.getDailyTransactions = async (req, res) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+    const pageNumber = parseInt(page);
+    const limitNumber = parseInt(limit);
+    const transactions = await Transaction.find({}, { _id: 0, createdAt: 0, updatedAt: 0, __v: 0 })
+      .sort({ date: -1 })
+      .skip((pageNumber - 1) * limitNumber)
+      .limit(limitNumber);
+    const totalTransactions = await Transaction.countDocuments();
+
+    res.status(200).json({
+      totalTransactions,
+      totalPages: Math.ceil(totalTransactions / limitNumber),
+      currentPage: pageNumber,
+      transactions,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching transactions", error: error.message });
   }
 };
