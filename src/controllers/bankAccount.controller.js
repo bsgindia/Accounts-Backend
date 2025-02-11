@@ -195,25 +195,24 @@ exports.getDailyTransactions = async (req, res) => {
     let searchQuery = {};
 
     if (search) {
-      searchQuery = {
-        $or: [
-          { accountNumber: { $regex: search, $options: "i" } },
-          { particular: { $regex: search, $options: "i" } }, 
-        ],
-      };
       const dateInput = new Date(search);
       if (!isNaN(dateInput.getTime())) {
-        searchQuery.$or.push({ date: dateInput });
+        searchQuery.date = {
+          $gte: new Date(dateInput.setHours(0, 0, 0, 0)),
+          $lt: new Date(dateInput.setHours(23, 59, 59, 999)),
+        };
       }
     }
-
-    const transactions = await Transaction.find(searchQuery, { _id: 0, createdAt: 0, updatedAt: 0, __v: 0 })
+    const totalTransactions = await Transaction.countDocuments(searchQuery);
+    const transactions = await Transaction.find(searchQuery, {
+      _id: 0,
+      createdAt: 0,
+      updatedAt: 0,
+      __v: 0,
+    })
       .sort({ date: -1 })
       .skip((pageNumber - 1) * limitNumber)
       .limit(limitNumber);
-
-    const totalTransactions = await Transaction.countDocuments(searchQuery);
-
     res.status(200).json({
       totalTransactions,
       totalPages: Math.ceil(totalTransactions / limitNumber),
@@ -224,5 +223,6 @@ exports.getDailyTransactions = async (req, res) => {
     res.status(500).json({ message: "Error fetching transactions", error: error.message });
   }
 };
+
 
 
