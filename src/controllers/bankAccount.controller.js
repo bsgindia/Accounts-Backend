@@ -134,34 +134,50 @@ exports.getaccountNumber = async (req, res) => {
 
 
 
-
 exports.registerdailytransition = async (req, res) => {
   try {
     const transactions = req.body.data;
     console.log("Received transactions:", transactions);
+
     for (let transaction of transactions) {
       const { date, accountNumber, debit, credit, particular } = transaction;
       const account = await BankAccount.findOne({ accountNumber });
 
       if (!account) {
+        console.log(`❌ Account ${accountNumber} not found.`);
         return res.status(404).json({ message: `Account ${accountNumber} not found` });
       }
-      const balanceBeforeTransaction = account.bankBalance;
-      let balanceAfterTransaction = balanceBeforeTransaction;
+
+      // Capture bookBalance before transaction
+      const balanceBeforeTransaction = account.bookBalance;
+      let balanceAfterTransaction = balanceBeforeTransaction; // Start with the same value
+      let operationType = ""; // To store which operation is performed
+
+      // Process transaction (update only bookBalance)
       if (debit > 0 && credit === 0) {
-        account.bookBalance += debit;
-        account.bankBalance += debit;
         balanceAfterTransaction += debit;
-      }
-      if (debit === 0 && credit > 0) {
-        if (account.bankBalance < credit) {
-          return res.status(400).json({ message: `Insufficient balance for account ${accountNumber}` });
+        operationType = `✅ Debit of ${debit} performed on account ${accountNumber}`;
+      } else if (debit === 0 && credit > 0) {
+        if (balanceBeforeTransaction < credit) {
+          console.log(`❌ Insufficient book balance for account ${accountNumber}`);
+          return res.status(400).json({ message: `Insufficient book balance for account ${accountNumber}` });
         }
-        account.bookBalance -= credit;
-        account.bankBalance -= credit;
         balanceAfterTransaction -= credit;
+        operationType = `✅ Credit of ${credit} performed on account ${accountNumber}`;
+      } else {
+        console.log(`⚠️ Invalid transaction: Both debit and credit cannot be nonzero.`);
+        return res.status(400).json({ message: `Invalid transaction: Both debit and credit cannot be nonzero.` });
       }
+
+      // Update account bookBalance only once
+      account.bookBalance = balanceAfterTransaction;
       await account.save();
+
+      // Log the operation in the console
+      console.log(operationType);
+      console.log(`🔹 Balance before: ${balanceBeforeTransaction}, Balance after: ${balanceAfterTransaction}`);
+
+      // Save the transaction with the correct balances
       const newTransaction = new Transaction({
         date,
         particular,
@@ -169,20 +185,24 @@ exports.registerdailytransition = async (req, res) => {
         debit,
         credit,
         transactionType: debit > 0 ? "debit" : "credit",
-        balanceBeforeTransaction,
-        balanceAfterTransaction,
-        status: "completed"
+        balanceBeforeTransaction, // Remains unchanged from the beginning
+        balanceAfterTransaction, // Final updated value
+        status: "completed",
       });
-console.log(newTransaction)
+
+      console.log("📌 Transaction saved:", newTransaction);
       await newTransaction.save();
     }
 
     res.status(200).json({ message: "Bank transactions processed and saved successfully" });
   } catch (error) {
-    console.error("Error processing transactions:", error);
+    console.error("❌ Error processing transactions:", error);
     res.status(500).json({ message: "Error processing bank transactions", error: error.message });
   }
 };
+
+
+
 
 
 
@@ -213,9 +233,10 @@ exports.getDailyTransactions = async (req, res) => {
       .sort({ date: -1 })
       .skip((pageNumber - 1) * limitNumber)
       .limit(limitNumber);
+    const totalPages = Math.ceil(totalTransactions / limitNumber);
     res.status(200).json({
       totalTransactions,
-      totalPages: Math.ceil(totalTransactions / limitNumber),
+      totalPages,
       currentPage: pageNumber,
       transactions,
     });
@@ -223,6 +244,7 @@ exports.getDailyTransactions = async (req, res) => {
     res.status(500).json({ message: "Error fetching transactions", error: error.message });
   }
 };
+
 
 
 
