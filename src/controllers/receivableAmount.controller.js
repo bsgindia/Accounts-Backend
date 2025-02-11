@@ -1,20 +1,37 @@
 const ReceivableAmount = require('../models/receivableAmount.model');
+const Receivable = require("../models/receivabledeatails.model"); 
 
 exports.addReceivableAmount = async (req, res) => {
   try {
     const { receivableId, receivedAmount, details } = req.body;
     if (!receivableId || receivedAmount === undefined) {
-      return res.status(400).json({ message: 'Receivable ID and Received Amount are required.' });
+      return res.status(400).json({ message: "Receivable ID and Received Amount are required." });
     }
+    const receivable = await Receivable.findOne({ receivableId });
+
+    if (!receivable) {
+      return res.status(404).json({ message: "Receivable record not found." });
+    }
+    if (receivable.receivableAmount < receivedAmount) {
+      return res.status(400).json({ message: "Received amount exceeds the pending receivable amount." });
+    }
+    receivable.receivableAmount -= receivedAmount;
+    await receivable.save();
     const receivableAmount = new ReceivableAmount({
       receivableId,
       receivedAmount,
       details,
     });
     await receivableAmount.save();
-    res.status(201).json({ message: 'Receivable amount added successfully.'});
+    res.status(201).json({
+      message: "Receivable amount added successfully and deducted from pending amount.",
+      updatedReceivable: receivable,
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to add receivable amount.', error: error.message });
+    res.status(500).json({
+      message: "Failed to add receivable amount.",
+      error: error.message,
+    });
   }
 };
 

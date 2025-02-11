@@ -71,6 +71,7 @@ const dotenv = require("dotenv");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const winston = require("winston");
+const mongoose = require("mongoose");
 const connectToDatabase = require("./src/config/db");
 const authadmin = require('./src/routes/auth.routes.js');
 const bankRoutes = require('./src/routes/bankRoutes.routes.js');
