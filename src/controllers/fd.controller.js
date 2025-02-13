@@ -80,7 +80,12 @@ exports.getAllFDs = async (req, res) => {
 
 exports.getAllFDAmount = async (req, res) => {
     try {
+        const today = new Date();
+        const todayDateOnly = new Date(today.setHours(0, 0, 0, 0));
         const result = await FDModel.aggregate([
+            {
+                $match: { maturityDate: { $gt: todayDateOnly } } 
+            },
             { 
                 $project: { 
                     fdAdmount: { $toDouble: "$fdAdmount" }, 
@@ -95,16 +100,9 @@ exports.getAllFDAmount = async (req, res) => {
                 } 
             }
         ]);
-
         const totalAmount = result.length > 0 ? result[0].totalAmount : 0;
         const totalMaturityAmount = result.length > 0 ? result[0].totalMaturityAmount : 0;
-
-        const fds = await FDModel.find({}).select('fdAdmount maturityAmount');
-
-        if (fds.length === 0) {
-            return res.status(404).json({ message: 'No FDs found' });
-        }
-
+        
         res.status(200).json({
             message: 'All FD details fetched successfully',
             totalAmount,
@@ -115,6 +113,7 @@ exports.getAllFDAmount = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
+
 
 
 
