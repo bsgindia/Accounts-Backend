@@ -13,6 +13,7 @@ const receivableRoutes=require("./src/routes/receivable.routes.js");
 const receivableDetailsRoutes=require("./src/routes/receivabledeatails.routes.js");
 const receivableAmountRoutes=require("./src/routes/receivableamount.routes.js")
 const stateRoutes = require('./src/routes/state.routes.js');
+const { startCronJob } = require("./src/controllers/fd.controller.js");
 dotenv.config();
 const app = express();
 app.use(
@@ -51,6 +52,7 @@ app.use('/api/v1', stateRoutes);
 const startServer = async () => {
     try {
         await connectToDatabase();
+        await startCronJob()
         const PORT = process.env.PORT || 5001;
         app.listen(PORT, () => {
             console.log(`Server is running on port ${PORT}`);
