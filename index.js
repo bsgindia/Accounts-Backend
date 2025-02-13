@@ -162,7 +162,7 @@ const startServer = async () => {
     try {
         logger.info("Starting server...");
         await connectToDatabase();
-await startCronJob()
+        await startCronJob()
         logger.info("Database connected successfully.");
         const PORT = process.env.PORT || 5001;
         app.listen(PORT, () => {
@@ -180,4 +180,4 @@ process.on("SIGINT", async () => {
     await mongoose.connection.close();
     logger.info("Database connection closed.");
     process.exit(0);
-}
+});
