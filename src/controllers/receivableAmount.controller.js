@@ -78,3 +78,22 @@ exports.getReceivableAmounts = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch receivable amounts.", error: error.message });
   }
 };
+
+
+exports.getTotalReceivableAmount = async (req, res) => {
+  try {
+    const result = await Receivable.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalReceivableAmount: { $sum: "$receivableAmount" },
+        },
+      },
+    ]);
+    const totalAmount = result.length > 0 ? result[0].totalReceivableAmount : 0;
+
+    res.status(200).json({ success: true, totalReceivableAmount: totalAmount });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server Error", error });
+  }
+};

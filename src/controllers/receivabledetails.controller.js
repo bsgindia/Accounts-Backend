@@ -63,7 +63,23 @@ const ReceivablesID = async (req, res) => {
         res.status(500).json({ message: 'Error fetching receivables', error: error.message });
     }
 };
+const editReceivable = async (req, res) => {
+    try {
+        const { receivableId } = req.params;
+        const updateData = req.body;
+        
+        const updatedReceivable = await receivableDeatails.findOneAndUpdate({ receivableId }, updateData, { new: true });
+        
+        if (!updatedReceivable) {
+            return res.status(404).json({ message: 'Receivable not found.' });
+        }
+        res.status(200).json({ message: 'Receivable updated successfully', data: updatedReceivable });
+    } catch (error) {
+        console.error('Error updating receivable:', error);
+        res.status(500).json({ message: 'Error updating receivable', error: error.message });
+    }
+};
 
 module.exports = {
-    registerReceivable, getReceivables,ReceivablesID
+    registerReceivable, getReceivables,ReceivablesID,editReceivable
 };

@@ -8,8 +8,14 @@ const liabilitySchema = new mongoose.Schema(
     payableBy: { type: Date, required: true },
     totalOutstanding: { type: Number, required: true },
     minimumOutstandingPayable: { type: Number, required: true },
-    minimumPayableBeforeMonth: { type: String, required: true, default: " " },
+    minimumPayableBeforeMonth: { type: Number, required: true, default: " " },
     remarks: { type: String, default: "No remarks provided" },
+    payments: [
+      {
+        amountPaid: { type: Number },
+        paidOn: { type: Date },
+      },
+    ],
   },
   { timestamps: true }
 );
