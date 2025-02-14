@@ -130,6 +130,7 @@ const transporter = nodemailer.createTransport({
 
 exports.startCronJob = () => {
     cron.schedule("30 5 * * *", checkAndSendMaturityEmails);
+    // setInterval(checkAndSendMaturityEmails, 1000);
     console.log("Cron job scheduled to run every minute.");
 };
 
