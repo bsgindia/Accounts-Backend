@@ -5,5 +5,5 @@ const { verifyToken } = require("../middleware/auth.middleware.js");
 
 router.post('/register-particulars',verifyToken, particularsController.registerparticulars);
 router.get("/get-particulars",verifyToken,particularsController.getparticulars);
-
+router.delete('/delete-particulars', verifyToken, particularsController.deleteParticulars);
 module.exports = router;

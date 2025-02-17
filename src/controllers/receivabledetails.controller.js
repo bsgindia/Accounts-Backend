@@ -13,7 +13,6 @@ const registerReceivable = async (req, res) => {
         } = req.body;
         if (
             !receivableType ||
-            !description ||
             !receivableFor ||
             !receivableFromDate ||
             !receivableFromState ||
@@ -79,7 +78,23 @@ const editReceivable = async (req, res) => {
         res.status(500).json({ message: 'Error updating receivable', error: error.message });
     }
 };
+const deleteReceivable = async (req, res) => {
+    try {
+        const { receivableId } = req.params;
+        
+        const deletedReceivable = await receivableDeatails.findOneAndDelete({ receivableId });
+        
+        if (!deletedReceivable) {
+            return res.status(404).json({ message: 'Receivable not found.' });
+        }
+        
+        res.status(200).json({ message: 'Receivable deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting receivable:', error);
+        res.status(500).json({ message: 'Error deleting receivable', error: error.message });
+    }
+};
 
 module.exports = {
-    registerReceivable, getReceivables,ReceivablesID,editReceivable
+    registerReceivable, getReceivables,ReceivablesID,editReceivable,deleteReceivable
 };

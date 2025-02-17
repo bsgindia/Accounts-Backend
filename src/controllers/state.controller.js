@@ -30,7 +30,7 @@ exports.createState = async (req, res) => {
 
 exports.getStates = async (req, res) => {
     try {
-        const states = await State.find({},{_id:0,__v:0});
+        const states = await State.find({}, { _id: 0, __v: 0 });
 
         res.status(200).json({
             message: 'States fetched successfully.',
@@ -38,6 +38,33 @@ exports.getStates = async (req, res) => {
         });
     } catch (error) {
         console.error('Error fetching states:', error);
+        res.status(500).json({
+            message: 'Internal server error. Please try again later.',
+        });
+    }
+};
+
+
+
+exports.deleteState = async (req, res) => {
+    try {
+        const { name } = req.query;
+        if (!name) {
+            return res.status(400).json({ message: 'State name is required.' });
+        }
+        const deletedState = await State.findOneAndDelete({
+            state: name
+        });
+
+        if (!deletedState) {
+            return res.status(404).json({ message: 'State not found.' });
+        }
+
+        res.status(200).json({
+            message: 'State deleted successfully.',
+        });
+    } catch (error) {
+        console.error('Error deleting state:', error);
         res.status(500).json({
             message: 'Internal server error. Please try again later.',
         });

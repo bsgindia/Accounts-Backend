@@ -13,7 +13,7 @@ const receivableSchema = new mongoose.Schema(
         },
         description: {
             type: String,
-            required: true,
+            default:"",
         },
         receivableFor: {
             type: Number,
@@ -36,7 +36,7 @@ const receivableSchema = new mongoose.Schema(
         status: {
             type: String,
             required: true,
-            enum: ['Pending', 'Paid', 'Waveoff'],
+            enum: ['Pending', 'Paid', 'WaiveOff'],
             default: 'Pending',
         },
     },

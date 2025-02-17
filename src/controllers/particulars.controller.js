@@ -43,3 +43,28 @@ exports.getparticulars = async (req, res) => {
   };
   
   
+
+  exports.deleteParticulars = async (req, res) => {
+    const { id } = req.query;
+  
+    if (!id) {
+      return res.status(400).json({ message: 'Particular ID is required.' });
+    }
+  
+    try {
+      const deletedParticular = await ParticularsModel.findByIdAndDelete(id);
+  
+      if (!deletedParticular) {
+        return res.status(404).json({ message: 'Particular not found.' });
+      }
+  
+      res.status(200).json({
+        message: 'Particular deleted successfully.',
+      });
+    } catch (error) {
+      console.error('Error deleting particular:', error.message);
+      res.status(500).json({
+        message: 'Internal server error. Please try again later.',
+      });
+    }
+  };
