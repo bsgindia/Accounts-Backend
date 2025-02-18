@@ -1,5 +1,5 @@
 const receivableDeatails = require('../models/receivabledeatails.model');
-
+const ReceivableAmount = require('../models/receivableAmount.model');
 const registerReceivable = async (req, res) => {
     try {
         const {
@@ -39,11 +39,28 @@ const registerReceivable = async (req, res) => {
 };
 const getReceivables = async (req, res) => {
     try {
-        const receivables = await receivableDeatails.find({},{_id:0,__v:0});
+        const receivables = await receivableDeatails.find({}, { __v: 0 });
         if (!receivables || receivables.length === 0) {
             return res.status(404).json({ message: 'No receivables found.' });
         }
-        res.status(200).json({ data: receivables });
+        const receivableAmountData = await ReceivableAmount.find({}, 'receivedAmount details date receivableId');
+        const updatedReceivables = receivables.map(receivable => {
+            const relatedReceivableAmount = receivableAmountData.find(amount => 
+                amount.receivableId.some(id => id.toString() === receivable._id.toString())
+            );
+            if (relatedReceivableAmount) {
+                return {
+                    ...receivable.toObject(),
+                    receivableAmountDetails: {
+                        receivedAmount: relatedReceivableAmount.receivedAmount,
+                        details: relatedReceivableAmount.details,
+                        date: relatedReceivableAmount.date
+                    }
+                };
+            }
+            return receivable;
+        });
+        res.status(200).json({ data: updatedReceivables });
     } catch (error) {
         console.error('Error fetching receivables:', error);
         res.status(500).json({ message: 'Error fetching receivables', error: error.message });

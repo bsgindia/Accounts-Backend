@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 
 exports.addReceivableAmount = async (req, res) => {
   try {
-    const { receivableId, receivedAmount, details } = req.body;
+    const { receivableId, receivedAmount, details ,date} = req.body;
 
     // Validate input
     if (!Array.isArray(receivableId) || receivableId.length === 0) {
@@ -46,6 +46,7 @@ exports.addReceivableAmount = async (req, res) => {
       receivableId: validIds, // Store array of ObjectIds
       receivedAmount,
       details,
+      date
     });
 
     await receivableAmount.save();

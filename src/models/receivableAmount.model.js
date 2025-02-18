@@ -19,6 +19,10 @@ const ReceivableAmountSchema = new mongoose.Schema(
       required: false,
       trim: true,
     },
+    date: {
+      type: Date,
+      required: true,
+    },
   },
   {
     timestamps: true,
