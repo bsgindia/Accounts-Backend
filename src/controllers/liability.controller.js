@@ -75,9 +75,9 @@ exports.updateLiability = async (req, res) => {
         if (req.body.minimumOutstandingPayable !== undefined) {
           req.body.minimumOutstandingPayable -= totalAmountPaid;
         }
-        if (req.body.minimumPayableBeforeMonth !== undefined) {
-          req.body.minimumPayableBeforeMonth -= totalAmountPaid;
-        }
+        // if (req.body.minimumPayableBeforeMonth !== undefined) {
+        //   req.body.minimumPayableBeforeMonth -= totalAmountPaid;
+        // }
       }
     }
     await Liability.findByIdAndUpdate(req.params.id, req.body, {

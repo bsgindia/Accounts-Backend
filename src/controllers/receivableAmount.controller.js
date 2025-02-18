@@ -63,21 +63,28 @@ exports.addReceivableAmount = async (req, res) => {
   }
 };
 
-
-
 exports.getReceivableAmounts = async (req, res) => {
   try {
-    const receivables = await ReceivableAmount.find().populate('receivableId').exec();
+    const receivables = await ReceivableAmount.find()
+      .populate({
+        path: 'receivableId',
+        select: 'receivableId receivableType'
+      })
+      .exec();
+
     const receivableData = receivables.map(receivable => ({
       ...receivable.toObject(),
-      receivableId: receivable.receivableId.map(item => item.receivableId)
+      receivableId: receivable.receivableId.map(item => item.receivableId),
+      receivableType: receivable.receivableId.map(item => item.receivableType)[0]
     }));
+
     res.status(200).json({ data: receivableData });
   } catch (error) {
     console.error("Error fetching receivables:", error.message);
     res.status(500).json({ message: "Failed to fetch receivable amounts.", error: error.message });
   }
 };
+
 
 
 exports.getTotalReceivableAmount = async (req, res) => {
