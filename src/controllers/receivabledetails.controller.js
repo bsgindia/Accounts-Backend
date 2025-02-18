@@ -43,29 +43,31 @@ const getReceivables = async (req, res) => {
         if (!receivables || receivables.length === 0) {
             return res.status(404).json({ message: 'No receivables found.' });
         }
+
         const receivableAmountData = await ReceivableAmount.find({}, 'receivedAmount details date receivableId');
+
         const updatedReceivables = receivables.map(receivable => {
-            const relatedReceivableAmount = receivableAmountData.find(amount => 
+            const relatedReceivableAmounts = receivableAmountData.filter(amount => 
                 amount.receivableId.some(id => id.toString() === receivable._id.toString())
             );
-            if (relatedReceivableAmount) {
-                return {
-                    ...receivable.toObject(),
-                    receivableAmountDetails: {
-                        receivedAmount: relatedReceivableAmount.receivedAmount,
-                        details: relatedReceivableAmount.details,
-                        date: relatedReceivableAmount.date
-                    }
-                };
-            }
-            return receivable;
+
+            return {
+                ...receivable.toObject(),
+                receivableAmountDetails: relatedReceivableAmounts.map(amount => ({
+                    receivedAmount: amount.receivedAmount,
+                    details: amount.details,
+                    date: amount.date
+                }))
+            };
         });
+
         res.status(200).json({ data: updatedReceivables });
     } catch (error) {
         console.error('Error fetching receivables:', error);
         res.status(500).json({ message: 'Error fetching receivables', error: error.message });
     }
 };
+
 
 const ReceivablesID = async (req, res) => {
     try {
