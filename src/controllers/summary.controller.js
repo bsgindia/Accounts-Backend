@@ -9,6 +9,8 @@ exports.summary = async (req, res) => {
         today.setHours(0, 0, 0, 0);
         const sixMonthsLater = new Date();
         sixMonthsLater.setMonth(sixMonthsLater.getMonth() + 6);
+        const thirtyDaysLater = new Date();
+        thirtyDaysLater.setDate(thirtyDaysLater.getDate() + 30);
         const bankResult = await BankAccount.aggregate([
             {
                 $group: {
@@ -19,13 +21,13 @@ exports.summary = async (req, res) => {
             }
         ]);
         const fdList = await FDModel.find({
-            maturityDate: { $gte: today, $lte: sixMonthsLater }
+            maturityDate: { $gte: today, $lte: thirtyDaysLater }
         }).select("fdNumber connectingAccount fdAdmount maturityAmount maturityDate interestRate");
         const fdTotals = await FDModel.aggregate([
             {
                 $facet: {
                     next6Months: [
-                        { $match: { maturityDate: { $gte: today, $lte: sixMonthsLater } } },
+                        { $match: { maturityDate: { $gte: today, $lte: thirtyDaysLater } } },
                         {
                             $group: {
                                 _id: null,
@@ -35,7 +37,7 @@ exports.summary = async (req, res) => {
                         }
                     ],
                     allActiveFDs: [
-                        { $match: { maturityDate: { $gte: today } } }, // Excluding past maturity
+                        { $match: { maturityDate: { $gte: today } } },
                         {
                             $group: {
                                 _id: null,
